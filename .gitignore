@@ -2,5 +2,6 @@
 /client/dist
 /client/.tmp
 /client/.sass-cache
+.tmp/
 /bower_components
 .editor-settings

@@ -9,6 +9,8 @@
 
 module.exports = function (grunt) {
 
+  grunt.loadNpmTasks('grunt-hapi');
+
   // Time how long tasks take. Can help when optimizing build times
   require('time-grunt')(grunt);
 
@@ -22,7 +24,7 @@ module.exports = function (grunt) {
   // Configurable paths for the application
   var appConfig = {
     app: require('./bower.json').appPath || 'client/app',
-    dist: 'dist'
+    dist: 'client/dist'
   };
 
   // Define the configuration for all the tasks
@@ -51,6 +53,13 @@ module.exports = function (grunt) {
         files: ['<%= yeoman.app %>/styles/{,*/}*.css'],
         tasks: ['newer:copy:styles', 'postcss']
       },
+      hapi: {
+        files: ['server/**/*.js'],
+        tasks: ['hapi'],
+        options: {
+          spawn: false
+        }
+      },
       gruntfile: {
         files: ['Gruntfile.js']
       },
@@ -60,9 +69,20 @@ module.exports = function (grunt) {
         },
         files: [
           '<%= yeoman.app %>/{,*/}*.html',
-          '.tmp/styles/{,*/}*.css',
+          'client/.tmp/styles/{,*/}*.css',
           '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
         ]
+      }
+    },
+
+    // Init server
+    hapi: {
+      customs_options: {
+        options: {
+          server: require('path').resolve('server/api'),
+          noasync: false,
+          bases: {}
+        }
       }
     },
 
@@ -79,7 +99,7 @@ module.exports = function (grunt) {
           open: true,
           middleware: function (connect) {
             return [
-              connect.static('.tmp'),
+              connect.static('client/.tmp'),
               connect().use(
                 '/bower_components',
                 connect.static('./bower_components')
@@ -98,7 +118,7 @@ module.exports = function (grunt) {
           port: 9001,
           middleware: function (connect) {
             return [
-              connect.static('.tmp'),
+              connect.static('client/.tmp'),
               connect.static('test'),
               connect().use(
                 '/bower_components',
@@ -160,13 +180,13 @@ module.exports = function (grunt) {
         files: [{
           dot: true,
           src: [
-            '.tmp',
+            'client/.tmp',
             '<%= yeoman.dist %>/{,*/}*',
             '!<%= yeoman.dist %>/.git{,*/}*'
           ]
         }]
       },
-      server: '.tmp'
+      server: 'client/.tmp'
     },
 
     // Add vendor prefixed styles
@@ -182,9 +202,9 @@ module.exports = function (grunt) {
         },
         files: [{
           expand: true,
-          cwd: '.tmp/styles/',
+          cwd: 'client/.tmp/styles/',
           src: '{,*/}*.css',
-          dest: '.tmp/styles/'
+          dest: 'client/.tmp/styles/'
         }]
       },
       dist: {
@@ -343,7 +363,7 @@ module.exports = function (grunt) {
         },
         cwd: '<%= yeoman.app %>',
         src: 'views/{,*/}*.html',
-        dest: '.tmp/templateCache.js'
+        dest: 'client/.tmp/templateCache.js'
       }
     },
 
@@ -353,9 +373,9 @@ module.exports = function (grunt) {
       dist: {
         files: [{
           expand: true,
-          cwd: '.tmp/concat/scripts',
+          cwd: 'client/.tmp/concat/scripts',
           src: '*.js',
-          dest: '.tmp/concat/scripts'
+          dest: 'client/.tmp/concat/scripts'
         }]
       }
     },
@@ -383,7 +403,7 @@ module.exports = function (grunt) {
           ]
         }, {
           expand: true,
-          cwd: '.tmp/images',
+          cwd: 'client/.tmp/images',
           dest: '<%= yeoman.dist %>/images',
           src: ['generated/*']
         }, {
@@ -396,7 +416,7 @@ module.exports = function (grunt) {
       styles: {
         expand: true,
         cwd: '<%= yeoman.app %>/styles',
-        dest: '.tmp/styles/',
+        dest: 'client/.tmp/styles/',
         src: '{,*/}*.css'
       }
     },
@@ -437,6 +457,7 @@ module.exports = function (grunt) {
       'concurrent:server',
       'postcss:server',
       'connect:livereload',
+      'hapi',
       'watch'
     ]);
   });
